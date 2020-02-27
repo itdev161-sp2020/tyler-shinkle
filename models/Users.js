@@ -31,3 +31,8 @@ const User = mongoose.model('user',UserSchema);
 //Export the User model to make it accessible to the rest of your application
 //export is a javascript keyword I need to research further...
 export default User;
+
+//stage, commit and push branch
+//git add . 
+//git commit -m "message"
+//git -u origin "branchName"
