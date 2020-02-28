@@ -35,4 +35,4 @@ export default User;
 //stage, commit and push branch
 //git add . 
 //git commit -m "message"
-//git -u origin "branchName"
+//git push -u origin "branchName"

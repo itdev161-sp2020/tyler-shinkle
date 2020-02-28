@@ -32,7 +32,7 @@ app.get('/',(req,res)=>
  app.post(
      //destination
      '/api/users',
-     //functions which return an error if true.
+     //functions which create an error object if false.
      [
         check('name','Please enter your name.')
             .not()
@@ -46,7 +46,7 @@ app.get('/',(req,res)=>
      (req,res)=>{
      //errors caught from imported express-validator and above code
      const errors = validationResult(req);
-     //if there is an error return error object array
+     //if there is an error return error object array (msg, param, location) are properties of errors
      if(!errors.isEmpty()){
          return res.status(442).json({errors:errors.array() });
      //otherwise return request body
