@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import config from 'config';
 
-//get connection string
+//get connection string from our config folders default JSON file. (key:'value')
 const db = config.get('mongoURI');
 
 //connect to MongoDB
