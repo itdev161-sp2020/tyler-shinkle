@@ -1,0 +1,8 @@
+NPM SCRIPTS... 
+
+
+we added a server script which lead our server running
+
+we added a client script which lead to our client running ("what is a prefix in this context")
+
+we added a dev script which ran concurrently first, then our server , then our client.

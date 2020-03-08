@@ -3,6 +3,8 @@ import connectDatabase from './config/db';
 //importing check and validationResult which are named exports (hence the curly braces)
 //no braces will import whatever the default export is...
 import {check,validationResult} from 'express-validator';
+//allow CORS
+import cors from 'cors';
 
 //initialize express application
 const app = express();
@@ -10,8 +12,13 @@ const app = express();
 //connect database // function within db.js file we imported above.
 connectDatabase();
 
-//configure middleware
+//configure middleware (express is the web server framework and cors allows for CORS)
 app.use(express.json({extended: false}));
+app.use(
+    cors({
+        origin:'http://localhost:3000'
+    })
+)
 
 //API endpoints
 
@@ -57,7 +64,9 @@ app.get('/',(req,res)=>
  );
 
 //connection listener
-app.listen(3000, ()=>console.log('Express server running on port 3000'));
+//changed ports to prevent interference, template literals require  back ticks ``
+const port = 5000;
+app.listen(port, ()=>console.log(`Express server running on port ${port}`));
 
 //to test run npm run server and navigate to localhost:3000
 //postman helps us test this api and build custom headers / bodies
