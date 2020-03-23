@@ -5,6 +5,14 @@ import connectDatabase from './config/db';
 import {check,validationResult} from 'express-validator';
 //allow CORS
 import cors from 'cors';
+//our model to create users
+import User from './models/User';
+//used to encrypt password
+import bcrypt from 'bcryptjs';
+//import json web token
+import jwt from 'jsonwebtoken';
+//import config...
+import config from 'config';
 
 //initialize express application
 const app = express();
@@ -50,7 +58,7 @@ app.get('/',(req,res)=>
         ).isLength({min:6})
      ],
      //function with request and response objects
-     (req,res)=>{
+     async (req,res)=>{
      //errors caught from imported express-validator and above code
      const errors = validationResult(req);
      //if there is an error return error object array (msg, param, location) are properties of errors
@@ -58,7 +66,54 @@ app.get('/',(req,res)=>
          return res.status(442).json({errors:errors.array() });
      //otherwise return request body
      } else{
-         return res.send(req.body);
+        //deconstruct request body into 3 constants
+        //const {propName, anotherPropName} = object with matching props;
+        const {name, email, password} = req.body;
+        try{
+            //check if user exists
+            let user = await User.findOne({email:email});
+            //if user exists, send error message
+            if(user){
+                return res
+                    .status(400)
+                    .json({errors: [{msg: 'User already exists'}]});
+            }
+
+            //create new user if no match was found
+            user = new User({
+                name: name,
+                email: email,
+                password: password
+            });
+
+            //encrypt password
+            const salt = await bcrypt.genSalt(10);
+            user.password = await bcrypt.hash(password,salt);
+
+            //save user to db and return 
+            await user.save();
+            
+            //generate and return JWT
+            const payload = {
+                user:{
+                    id:user.id
+                }
+            };
+
+            jwt.sign(
+                payload,
+                config.get('jwtSecret'),
+                {expiresIn: '10hr'},
+                (err, token) => {
+                    if(err) throw err;
+                    //if we make it this far
+                    //respond with the token key/value pair
+                    res.json({token: token});
+                }
+            );
+        }catch(error){
+            res.status(500).send("Server Error!");
+        }
      }
     }
  );
