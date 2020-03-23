@@ -39,3 +39,5 @@ class App extends React.Component{
   }
 }
 export default App;
+//run both ends concurrently
+//npm run dev
