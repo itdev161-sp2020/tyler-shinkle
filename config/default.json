@@ -1,3 +1,4 @@
 {
-   "mongoURI": "mongodb+srv://tyShinkle:Acb!vut1@cluster0-7kz0y.mongodb.net/test?retryWrites=true&w=majority"
+   "mongoURI": "mongodb+srv://tyShinkle:Acb!vut1@cluster0-7kz0y.mongodb.net/test?retryWrites=true&w=majority",
+   "jwtSecret": "mayTheForceBeWithYou"
 }

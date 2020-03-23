@@ -9,6 +9,10 @@ import cors from 'cors';
 import User from './models/User';
 //used to encrypt password
 import bcrypt from 'bcryptjs';
+//import json web token
+import jwt from 'jsonwebtoken';
+//import config...
+import config from 'config';
 
 //initialize express application
 const app = express();
@@ -88,7 +92,23 @@ app.get('/',(req,res)=>
 
             //save user to db and return 
             await user.save();
-            res.send("User successfully registered!");
+            
+            //generate and return JWT
+            const payload = {
+                user:{
+                    id:user.id
+                }
+            };
+
+            jwt.sign(
+                payload,
+                config.get('jwtSecret'),
+                {expiresIn: '10hr'},
+                (err, token) => {
+                    if(err) throw err;
+                    res.json({token: token});
+                }
+            );
         }catch(error){
             res.status(500).send("Server Error!");
         }
