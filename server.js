@@ -106,6 +106,8 @@ app.get('/',(req,res)=>
                 {expiresIn: '10hr'},
                 (err, token) => {
                     if(err) throw err;
+                    //if we make it this far
+                    //respond with the token key/value pair
                     res.json({token: token});
                 }
             );
