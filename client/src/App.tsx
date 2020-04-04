@@ -4,6 +4,11 @@ import React from 'react';
 import './App.css';
 //import axios which is useful for api's
 import axios from 'axios';
+//import router for navigating between components
+import {BrowserRouter as Router, Switch, Route, Link} from 'react-router-dom';
+//import our register / login components
+import Register from './components/Register/Register';
+import Login from './components/Login/Login';
 
 class App extends React.Component{
 
@@ -29,12 +34,38 @@ class App extends React.Component{
 
   render(){
     return(
-      <div className="App">
-        <header className="App-header">
-          GoodThings
-        </header>
-        {this.state.data}
-      </div>
+      //return a series of elements witin router tags, 
+      //we can navigate between components within these router tags
+      //<Link to ="path">TEXT</Link>
+      //exact path only triggers with exact paths, not extensions of 
+      //a path
+      <Router>
+        <div className="App">
+          <header className="App-header">
+            <h1>GoodThings</h1>
+            <ul>
+              <li>
+                <Link to ="/">Home</Link>
+              </li>
+              <li>
+                <Link to="/register">Register</Link>
+              </li>
+              <li>
+                <Link to="/login">Login</Link>
+              </li>
+            </ul>
+          </header>
+          <main>
+            <Route exact path="/">
+              {this.state.data}
+            </Route>
+            <Switch>
+              <Route exact path ="/register" component={Register}/>
+              <Route exact path ="/login" component={Login}/>
+            </Switch>
+          </main>
+        </div>
+      </Router>
     )
   }
 }
