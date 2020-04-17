@@ -13,6 +13,8 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 //import config...
 import config from 'config';
+//middleware to verify token 
+import auth from './middleware/auth';
 
 //initialize express application
 const app = express();
@@ -94,29 +96,86 @@ app.get('/',(req,res)=>
             await user.save();
             
             //generate and return JWT
-            const payload = {
-                user:{
-                    id:user.id
-                }
-            };
-
-            jwt.sign(
-                payload,
-                config.get('jwtSecret'),
-                {expiresIn: '10hr'},
-                (err, token) => {
-                    if(err) throw err;
-                    //if we make it this far
-                    //respond with the token key/value pair
-                    res.json({token: token});
-                }
-            );
+            returnToken(user, res);
         }catch(error){
             res.status(500).send("Server Error!");
         }
      }
     }
  );
+
+ //AUTHORIZE
+ //verify token and authenticate user 
+ app.get('/api/auth',auth,async(req,res) => {
+     try{
+         const user = await User.findById(req.user.id);
+         res.status(200).json(user);
+     }catch(error){
+         res.status(500).send('Unkown server error');
+     }
+ })
+
+ //LOGIN
+ app.post(
+     //url which triggers this function
+     '/api/login',
+     //parameters which validate our email and password
+     [
+         check('email','Please enter a valid email').isEmail(),
+         check('password','A password is required').exists()
+     ],
+     //anon async callback method with req / res objects
+     async(req,res)=>{
+         // set constant to our errors 
+        const error = validationResult(req);
+        //if errors is not empty do this, otherwise...
+        if(!error.isEmpty()){
+            return res.status(422).json({errors:errors.array()});
+        }else{
+            //assign values within body to constants of a like key
+            const {email, password} = req.body;
+            try{
+                //check if user exists
+                let user = await User.findOne({email: email});
+                if(!user){
+                    return res
+                        .status(400)
+                        .json({errors:[{msg: 'Invalid email or password'}]});
+                }
+
+                //check password
+                const match = await bcrypt.compare(password, user.password);
+                if(!match){
+                    return res
+                        .status(400)
+                        .json({errors:[{msg:'Invalid email or password'}]});
+                }
+                //generate and return a JWT token 
+                returnToken(user, res);
+            }catch(error){
+                res.status(500).send('Server error');
+            }
+        }
+     }
+ );
+
+ const returnToken = (user,res) => {
+     const payload ={
+         user:{
+             id:user.id
+         }
+     };
+
+     jwt.sign(
+         payload,
+         config.get('jwtSecret'),
+         {expiresIn: '10hr'},
+         (err,token) => {
+             if(err) throw err;
+             res.json({token: token});
+         }
+     );
+ };
 
 //connection listener
 //changed ports to prevent interference, template literals require  back ticks ``
