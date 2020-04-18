@@ -116,11 +116,11 @@ class App extends React.Component{
             <Switch>
               <Route 
                 exact path ="/register" 
-                render={(authProps) => <Register {...authProps}/>} 
+                render={() => <Register {...authProps}/>} 
               />
               <Route 
                 exact path ="/login" 
-                render={(authProps) => <Login{...authProps}/>}
+                render={() => <Login {...authProps}/>}
               />
             </Switch>
           </main>

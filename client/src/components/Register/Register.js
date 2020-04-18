@@ -15,7 +15,7 @@ const Register = ({authenticateUser}) =>{
     const [errorData, setErrorData]= useState({errors: null});
 
     //object destructuring, userData.name == the field in userData
-    //with the 'name' key.
+    //with the 'name' key. (there is also array destructuring)
     const {name,email,password,passwordConfirm} = userData;
     const {errors} = errorData;
 
@@ -63,7 +63,7 @@ const Register = ({authenticateUser}) =>{
 
                 setErrorData({
                     ...errors,
-                    errors: error.reponse.data.errors
+                    errors: error.response.data.errors
                 })
              }
              authenticateUser();

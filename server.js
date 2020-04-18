@@ -127,9 +127,9 @@ app.get('/',(req,res)=>
      //anon async callback method with req / res objects
      async(req,res)=>{
          // set constant to our errors 
-        const error = validationResult(req);
+        const errors = validationResult(req);
         //if errors is not empty do this, otherwise...
-        if(!error.isEmpty()){
+        if(!errors.isEmpty()){
             return res.status(422).json({errors:errors.array()});
         }else{
             //assign values within body to constants of a like key
@@ -140,7 +140,7 @@ app.get('/',(req,res)=>
                 if(!user){
                     return res
                         .status(400)
-                        .json({errors:[{msg: 'Invalid email or password'}]});
+                        .json({errors:[{msg: 'Invalid email'}] });
                 }
 
                 //check password
@@ -148,7 +148,7 @@ app.get('/',(req,res)=>
                 if(!match){
                     return res
                         .status(400)
-                        .json({errors:[{msg:'Invalid email or password'}]});
+                        .json({errors:[{msg:'Invalid password'}] });
                 }
                 //generate and return a JWT token 
                 returnToken(user, res);
