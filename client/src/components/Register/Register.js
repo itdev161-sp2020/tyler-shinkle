@@ -1,7 +1,9 @@
 import React, {useState} from 'react';
 import axios from 'axios';
+import {useHistory} from 'react-router-dom';
 
-const Register = () =>{
+const Register = ({authenticateUser}) =>{
+    let history = useHistory();
     //destructuring assignment, unpack array into first element within []
     const[userData, setUserData] = useState({
         name: '',
@@ -10,9 +12,12 @@ const Register = () =>{
         passwordConfirm:''
     });
 
+    const [errorData, setErrorData]= useState({errors: null});
+
     //object destructuring, userData.name == the field in userData
-    //with the 'name' key.
+    //with the 'name' key. (there is also array destructuring)
     const {name,email,password,passwordConfirm} = userData;
+    const {errors} = errorData;
 
     //fat arrow function with e parameter
     const onChange = (e) =>{
@@ -28,7 +33,7 @@ const Register = () =>{
 
     //if password confirmation passes, set newUser fields to 
     //match our fields at this point.
-    const register = async () => {
+    const registerUser = async () => {
         if(password !== passwordConfirm){
             console.log('Passwords do not match');
         }
@@ -48,11 +53,20 @@ const Register = () =>{
 
                 const body = JSON.stringify(newUser);
                 const res = await axios.post('http://localhost:5000/api/users',body,config);
-                console.log(res.data);
+               
+                //store user data and redirect
+                localStorage.setItem('token',res.data.token);
+                history.push('/');
+
             }catch(error){
-                console.error(error.response.data);
-                return;
+                localStorage.removeItem('token');
+
+                setErrorData({
+                    ...errors,
+                    errors: error.response.data.errors
+                })
              }
+             authenticateUser();
         }
     }
 
@@ -96,10 +110,15 @@ const Register = () =>{
                 />
             </div>
             <div>
-                <button onClick={()=>register()}>Register</button>
+                <button onClick={()=>registerUser()}>Register</button>
+            </div>
+            <div>
+                {errors && errors.map(error=>
+                    <div key={error.msg}>{error.msg}</div>)}
             </div>
         </div>
     )
 }
 
 export default Register
+//completed activity # 8
