@@ -122,7 +122,7 @@ app.get('/',(req,res)=>
      //parameters which validate our email and password
      [
          check('email','Please enter a valid email').isEmail(),
-         check('password','A password is required').exists()
+         check('password','A password is required').not().isEmpty()
      ],
      //anon async callback method with req / res objects
      async(req,res)=>{
@@ -140,7 +140,7 @@ app.get('/',(req,res)=>
                 if(!user){
                     return res
                         .status(400)
-                        .json({errors:[{msg: 'Invalid email'}] });
+                        .json({errors:[{msg: 'Invalid email or password'}] });
                 }
 
                 //check password
@@ -148,7 +148,7 @@ app.get('/',(req,res)=>
                 if(!match){
                     return res
                         .status(400)
-                        .json({errors:[{msg:'Invalid password'}] });
+                        .json({errors:[{msg:'Invalid email or password'}] });
                 }
                 //generate and return a JWT token 
                 returnToken(user, res);
