@@ -121,3 +121,4 @@ const Register = ({authenticateUser}) =>{
 }
 
 export default Register
+//completed activity # 8
