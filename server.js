@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { request } from 'express';
 import connectDatabase from './config/db';
 //importing check and validationResult which are named exports (hence the curly braces)
 //no braces will import whatever the default export is...
@@ -15,6 +15,8 @@ import jwt from 'jsonwebtoken';
 import config from 'config';
 //middleware to verify token 
 import auth from './middleware/auth';
+//import our post model
+import Post from './models/Post';
 
 //initialize express application
 const app = express();
@@ -158,6 +160,135 @@ app.get('/',(req,res)=>
         }
      }
  );
+
+ // Post endpoints
+ /*
+     @route Post api/posts
+     @desc Create post
+ */
+app.post(
+    //url extension
+    '/api/posts',
+    [
+        //auth middleware
+        auth,
+        [
+            //check our fields and load error messages if needed.
+            check('title','Title text is required.')
+                .not()
+                .isEmpty(),
+            check('body','Body text is required')
+                .not()
+                .isEmpty()
+        ]
+    ],
+    //async, doesn't block when used with await
+    //return value wrapped in promise
+    async (req,res)=>{
+        //set out error constant to the return value 
+        //of our validation with req passed.
+        const errors = validationResult(req);
+        if(!errors.isEmpty()){
+            res.status(400).json({errors:errors.array()});
+        }else{
+            //object deconstructor
+            const{ title, body } = req.body;
+            try{
+                //find user's post
+                const user = await User.findById(req.user.id);
+                //create a new post 
+                const post = new Post({
+                    user: user.id,
+                    title: title,
+                    body: body
+                });
+
+                //save to db and return 
+                await post.save();
+
+                res.json(post);
+            }catch(error){
+                console.error(error);
+                res.status(500).send('Server error');
+            }
+        }
+    }
+);
+
+//GET POSTS
+app.get('/api/posts',auth,async(req,res)=>{
+    try{
+        const posts = await Post.find().sort({date:-1});
+        res.json(posts);
+    }catch(error){
+        console.error(error);
+        res.status(500).send('Server error');
+    }
+});
+
+//GET A SINGLE POST
+app.get('/api/posts/:id',auth,async(req,res)=>{
+    try{
+        const post = await Post.findById(req.params.id);
+        //if nothing is fount respons accordingly
+        if(!post){
+            return res.status(404).json({msg:'Post not found'});
+        }
+        //if there is a matching post return it as JSON
+        res.json(post);
+    }catch(error){
+        console.error(error);
+        res.status(500).send('Server Error');
+    }
+});
+
+//DELETE A POST
+app.delete('/api/posts/:id',auth,async(req,res)=>{
+    try{
+        const post = await Post.findById(req.params.id);
+
+        if(!post){
+            return res.status(404).json({msg:'Post not fount'});
+        }
+
+        if(post.user.toString() !== req.user.id){
+            return res.status(401).json({msg:'User not authorized'});
+        }
+
+        await post.remove();
+
+        res.json({msg:'Post removed.'});
+    }catch(error){
+        console.error(error);
+        res.status(500).send('Server error.');
+    }
+});
+
+//UPDATE A POST
+app.put('/api/posts/:id',auth,async(req,res)=>{
+    try{
+        const {title,body} = req.body;
+        const post = await Post.findById(req.params.id);
+
+        if(!post){
+            return res.status(404).json({msg:'Post not found.'});
+        }
+
+        if(post.user.toString() !== req.user.id){
+            return res.status(401).json({msg:'User not authorized.'});
+        }
+
+        post.title = title || post.title;
+        post.body = body || post.body;
+
+        await post.save();
+
+        res.json(post);
+    }catch(error){
+        console.error(error);
+        res.status(500).send('Server error');
+    }
+});
 
  const returnToken = (user,res) => {
      const payload ={
