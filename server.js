@@ -226,6 +226,22 @@ app.get('/api/posts',auth,async(req,res)=>{
     }
 });
 
+//GET A SINGLE POST
+app.get('/api/posts/:id',auth,async(req,res)=>{
+    try{
+        const post = await Post.findById(req.params.id);
+        //if nothing is fount respons accordingly
+        if(!post){
+            return res.status(404).json({msg:'Post not found'});
+        }
+        //if there is a matching post return it as JSON
+        res.json(post);
+    }catch(error){
+        console.error(error);
+        res.status(500).send('Server Error');
+    }
+});
+
  const returnToken = (user,res) => {
      const payload ={
          user:{
