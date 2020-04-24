@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { request } from 'express';
 import connectDatabase from './config/db';
 //importing check and validationResult which are named exports (hence the curly braces)
 //no braces will import whatever the default export is...
@@ -241,6 +241,28 @@ app.get('/api/posts/:id',auth,async(req,res)=>{
         res.status(500).send('Server Error');
     }
 });
+
+//DELETE A POST
+app.delete('/api/posts/:id',auth,async(req,res)=>{
+    try{
+        const post = await Post.findById(req.params.id);
+
+        if(!post){
+            return res.status(404).json({msg:'Post not fount'});
+        }
+
+        if(post.user.toString() !== req.user.id){
+            return res.status(401).json({msg:'User not authorized'});
+        }
+
+        await post.remove();
+
+        res.json({msg:'Post removed.'});
+    }catch(error){
+        console.error(error);
+        res.status(500).send('Server error.');
+    }
+})
 
  const returnToken = (user,res) => {
      const payload ={
