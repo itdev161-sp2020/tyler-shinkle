@@ -14,7 +14,7 @@ class App extends React.Component{
 
   //hold data fetched from API
   state = {
-    data:null,
+    posts: [],
     token:null, 
     user:null
   }
@@ -22,17 +22,28 @@ class App extends React.Component{
   //method which stores data from our API in our state object
   //componentDidMount is a ReactJS component lifecycle method
   componentDidMount(){
-    axios.get('http://localhost:5000')
-      .then((response) => {
-        this.setState({
-          data:response.data
-        })
-      })
-      .catch((error) => {
-        console.error(`Error fetching data ${error}`);
-      })
-
       this.authenticateUser();
+  }
+
+  loadData(){
+    const {token} = this.state;
+
+    if(token){
+      const config ={
+        headers:{
+          'x-auth-token':token
+        }
+      };
+      axios.get('http://localhost:5000/api/posts',config)
+        .then(response => {
+          this.setState({
+            posts: response.data
+          });
+        })
+        .catch(error => {
+          console.error(`Error fetching data ${error}`);
+        });
+    }
   }
 
   //authenticate user 4/2020
@@ -41,7 +52,9 @@ class App extends React.Component{
 
     if(!token){
       localStorage.removeItem('user')
-      this.setState({user:null});
+      this.setState({
+        token: null,
+      });
     }
 
     if(token){
@@ -53,7 +66,13 @@ class App extends React.Component{
       axios.get('http://localhost:5000/api/auth',config)
         .then((response)=>{
           localStorage.setItem('user',response.data.name)
-          this.setState({user: response.data.name})
+          this.setState({
+            user: response.data.name,
+            token: token
+          },
+          ()=>{
+            this.loadData();
+          });
         })
         .catch((error) =>{
           localStorage.removeItem('user');
@@ -71,10 +90,11 @@ class App extends React.Component{
 
 
   render(){
-    let {user, data } = this.state;
+    let {user, posts } = this.state;
     const authProps ={
       authenticateUser: this.authenticateUser
-    }
+    };
+
     return(
       //return a series of elements witin router tags, 
       //we can navigate between components within these router tags
@@ -102,16 +122,23 @@ class App extends React.Component{
           </header>
           <main>
             <Route exact path="/">
-              {user?
+              {user? (
                 <React.Fragment>
                   <div>Hello {user}!</div>
-                  <div>{data}</div>
+                  <div>
+                    {posts.map(post=>(
+                      <div key={post.id}>
+                        <h1>{post.title}</h1>
+                        <p>{post.body}</p>
+                      </div>
+                    ))}
+                  </div>
                 </React.Fragment>
-                :
+              ):(
                 <React.Fragment>
                   Please Register or Login
                 </React.Fragment>
-              }
+              )}
             </Route>
             <Switch>
               <Route 
