@@ -4,8 +4,10 @@ import axios from 'axios';
 import {useHistory} from 'react-router-dom';
 import './styles.css';
 
+//pass props from tag in app.tsx
 const CreatePost = (props)=>{
     let history = useHistory();
+    //get token and onPostCreated method from props
     const {token,onPostCreated} = props;
     //current value, function that lets us update it...
     //this is part of useState and what it returns.
@@ -13,8 +15,10 @@ const CreatePost = (props)=>{
         title: '',
         body:''
     });
+    //tie title and body to postData
     const {title,body}=postData;
 
+    //update postData on change with the useState value, function that sets value
     const onChange =  e => {
         const {name,value} = e.target;
 
@@ -25,6 +29,7 @@ const CreatePost = (props)=>{
         })
     }
 
+    //attempt to add post to db and update page
     const create = async() =>{
         if(!title||!body){
             console.log('Title and body are required!');
