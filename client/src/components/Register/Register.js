@@ -2,6 +2,8 @@ import React, {useState} from 'react';
 import axios from 'axios';
 import {useHistory} from 'react-router-dom';
 
+//destructured parameter of authProps passed by App.tsx
+//This is where we receive the function we call on the bottom
 const Register = ({authenticateUser}) =>{
     let history = useHistory();
     //destructuring assignment, unpack array into first element within []
