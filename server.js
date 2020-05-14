@@ -17,6 +17,8 @@ import config from 'config';
 import auth from './middleware/auth';
 //import our post model
 import Post from './models/Post';
+//import path 
+import path from 'path';
 
 //initialize express application
 const app = express();
@@ -33,14 +35,6 @@ app.use(
 )
 
 //API endpoints
-
-/**
- * @route GET / 
- * @desc Test endpoint
- */
-app.get('/',(req,res)=>
-    res.send('http get request sent to root api endpoint')
-);
 
 /**
  * @route POST api/users
@@ -308,9 +302,21 @@ app.put('/api/posts/:id',auth,async(req,res)=>{
      );
  };
 
+ //serve build files in production
+ if(process.env.NODE_ENV === 'production'){
+     //set up build folder.
+     app.use(express.static('client/build'));
+
+     //Route all requests to serve up the built index file
+     //i.e. {cwd}/client/build/index.html
+     app.get('*',(req,res)=>{
+         res.sendFile(path.resolve(_dirname, 'client', 'build','index.html'));
+     });
+ }
+
 //connection listener
 //changed ports to prevent interference, template literals require  back ticks ``
-const port = 5000;
+const port = process.env.PORT || 5000;
 app.listen(port, ()=>console.log(`Express server running on port ${port}`));
 
 //to test run npm run server and navigate to localhost:3000
